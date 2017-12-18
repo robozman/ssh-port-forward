@@ -1,0 +1,5 @@
+Bash script to setup SSH Port Forwarding
+Perfect for creating Bash/ZSH/*SH aliases around
+
+Features to add:
+	- Saving of PID to allow easy exiting (with a --exit or --kill flag)
