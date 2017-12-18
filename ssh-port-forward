@@ -1,0 +1,19 @@
+#!/bin/bash
+
+
+if [ "$1" == "" ] || [ "$2" == "" ] || [ "$3" == "" ] || [ "$4" == "" ]; then
+	echo "No arguments given. Correct syntax 'ssh-port-forward <local_port> <forwarded_host> <forwarded_port> <ssh_host>'"
+	exit 1
+fi
+if [ ! -d "/var/run/user/$UID" ]; then
+	echo "Unable to create pid file. To kill the port forward you must manually kill the process"
+else
+	if [ ! -d "/var/run/user/$UID/ssh-port-forward" ]; then
+		mkdir /var/run/user/$UID/ssh-port-forward
+	fi
+fi
+
+echo "ssh -f -N -L $1:$2:$3 $4"
+ssh -f -N -L $1:$2:$3 $4
+echo $! > /var/run/user/$UID/ssh-port-forward/ssh.pid
+xdg-open http://localhost:8989/
