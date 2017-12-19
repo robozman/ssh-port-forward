@@ -26,3 +26,17 @@ Features to add:
 	- Saving of PID to allow easy exiting (with a --exit or --kill flag) [x] Added
 	- Add configurable temp directory
 
+
+Thanks to:
+	- https://ryanstutorials.net/bash-scripting-tutorial/bash-functions.php for showing me the syntax for functions (and making quips about their use of paraenthesis)
+	- http://tldp.org/LDP/abs/html/complexfunct.html for bash function tips
+	- http://tldp.org/LDP/abs/html/fto.html for testing file / folder / socket existence
+	- http://tldp.org/* at this point for teaching me everything
+	- https://gist.github.com/scy/6781836 for some intersting ssh backgrounding information that I did not make use of
+	- first comment at $ABOVE for linking me to $BELOW
+	- second comment at https://stackoverflow.com/questions/2241063/bash-script-to-setup-a-temporary-ssh-tunnel/15198031#15198031 for introducing me to ssh control sockets (which are super cool)
+	- the colorado school of mines for breaking me so much that after finished finals all I wanted to do is create more work for myself
+	- people on stack overflow for teaching me bash scripting (and everything else I know)
+	- the maker of the statue of liberty for being french
+	- the dinosaur on the Firefox "Unable to connect" page for being cute the *-thousand time I forgot how to script
+	- madeon for creating music to accompany me
