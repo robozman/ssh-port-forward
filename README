@@ -1,5 +1,28 @@
 Bash script to setup SSH Port Forwarding
 Perfect for creating Bash/ZSH/*SH aliases around
 
+Usage: ssh-port-forward <forward_name> <local_port> <forwarded_host> <forwarded_port>
+                        <ssh_host>
+
+ssh-port-forward options
+    -b <forward_name>      Opens the specified forward in the default browser
+    -h                      Prints this help message
+    -k <forward_name>       Closes the forward by the specified name
+
+ssh options
+    -i <identity_file>      Specify ssh keyfile to use for authentication
+    -p <ssh_port>           Specify a port that the ssh server is running on
+
+Browser options
+    -s                      Specify whether to use SSL/TLS when opening in the browser
+    -t                      Silent Mode: Does not open the link in the browser
+
+When run, creates a $FORWARD_NAME-ssh.run file in /var/run/user/$UID/ssh-port-forward/ which contains the PID of ssh, the local port, remote host, and remote port.
+
+If /var/run/user/$UID/ does not exist, script will exit 1
+
+
 Features to add:
-	- Saving of PID to allow easy exiting (with a --exit or --kill flag)
+	- Saving of PID to allow easy exiting (with a --exit or --kill flag) [x] Added
+	- Add configurable temp directory
+
