@@ -8,6 +8,7 @@ ssh-port-forward options
     -b <forward_name>      Opens the specified forward in the default browser
     -h                      Prints this help message
     -k <forward_name>       Closes the forward by the specified name
+    -l                      Lists all currently forwarded ports
 
 ssh options
     -i <identity_file>      Specify ssh keyfile to use for authentication

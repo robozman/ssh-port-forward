@@ -8,6 +8,7 @@ print_usage() {
 	echo "    -b <forward_name>       Opens the specified forward in the default browser"
 	echo "    -h                      Prints this help message"
 	echo "    -k <forward_name>       Closes the forward by the specified name"
+	echo "    -l                      Lists all currently forwarded ports"
 	echo ""
 	echo "ssh options"
 	echo "    -i <identity_file>      Specify ssh keyfile to use for authentication"
@@ -49,6 +50,27 @@ kill_forward() {
 	rm $FORWARD_TO_KILL-ssh.run
 }
 
+list_forwards() {
+	i=0
+	for filename in /var/run/user/$UID/ssh-port-forward/*.run; do
+		cd /var/run/user/$UID/ssh-port-forward
+		if [[ "$filename" == "/var/run/user/$UID/ssh-port-forward/*.run" ]]; then
+			break
+		fi
+		FORWARD_NAME=$( sed -n 's/FORWARD_NAME://p' "$filename" )
+		PID=$( sed -n 's/PID://p' "$filename" )
+		LOCAL_PORT=$( sed -n 's/LOCAL_PORT://p' "$filename" )
+		FORWARDED_HOST=$( sed -n 's/FORWARDED_HOST://p' "$filename" )
+		FORWARDED_PORT=$( sed -n 's/FORWARDED_PORT://p' "$filename" )
+		echo "$FORWARD_NAME: (PID: $PID)"
+		echo "        LOCAL: $LOCAL_PORT"
+		echo "        REMOTE: $FORWARDED_HOST:$FORWARDED_PORT"
+		((i++))
+	done
+	echo "$i forwards in /var/run/user/$UID/ssh-port-forward/"
+}
+
+
 if [ "$1" == "--help" ] || [ "$1" == "-help" ]; then
 	print_usage
 	exit 0
@@ -59,7 +81,7 @@ SILENT_MODE=false
 SSL=false
 
 
-while getopts ":b:hi:k:p:st" opt; do
+while getopts ":b:hi:k:lp:st" opt; do
 	case ${opt} in 
 		b )
 			FORWARD_TO_OPEN=$OPTARG
@@ -76,6 +98,10 @@ while getopts ":b:hi:k:p:st" opt; do
 		k )
 			FORWARD_TO_KILL=$OPTARG
 			kill_forward $FORWARD_TO_KILL
+			exit 0
+			;;
+		l )
+			list_forwards
 			exit 0
 			;;
 		p )
@@ -147,7 +173,7 @@ echo -n "PID:" >> /var/run/user/$UID/ssh-port-forward/$FORWARD_NAME-ssh.run
 ssh -S $FORWARD_NAME -O check $FORWARD_NAME 2>&1 >/dev/null | grep -o -P '(?<=\=).*(?=\))' >> /var/run/user/$UID/ssh-port-forward/$FORWARD_NAME-ssh.run
 echo "LOCAL_PORT:$LOCAL_PORT" >> /var/run/user/$UID/ssh-port-forward/$FORWARD_NAME-ssh.run
 echo "FORWARDED_HOST:$FORWARDED_HOST" >> /var/run/user/$UID/ssh-port-forward/$FORWARD_NAME-ssh.run
-echo "FOWARDED_PORT:$FORWARDED_PORT" >> /var/run/user/$UID/ssh-port-forward/$FORWARD_NAME-ssh.run
+echo "FORWARDED_PORT:$FORWARDED_PORT" >> /var/run/user/$UID/ssh-port-forward/$FORWARD_NAME-ssh.run
 echo "SSL:$SSL" >> /var/run/user/$UID/ssh-port-forward/$FORWARD_NAME-ssh.run
 
 
