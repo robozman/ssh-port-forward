@@ -5,7 +5,7 @@ print_usage() {
 	echo "                        <ssh_host>"
 	echo ""
 	echo "ssh-port-forward options"
-	echo "    -b <forward_name<       Opens the specified forward in the default browser"
+	echo "    -b <forward_name>       Opens the specified forward in the default browser"
 	echo "    -h                      Prints this help message"
 	echo "    -k <forward_name>       Closes the forward by the specified name"
 	echo ""
@@ -20,16 +20,16 @@ print_usage() {
 
 open_in_browser() {
 	
-	LOCAL_PORT=$( sed -n '2p' "$1-ssh.run")
+	#LOCAL_PORT=$( sed -n '2p' "$1-ssh.run")
+	LOCAL_PORT=$( sed -n 's/LOCAL_PORT://p' "$1-ssh.run" )
+	SSL=$( sed -n 's/ssl://p' "$1-ssh.run" )
 
-	if [ "$2" == "" ]; then
-		if [ -n "$SSL" ]; then
-			echo "Opening https://localhost:$LOCAL_PORT/"
-			xdg-open "https://localhost:$LOCAL_PORT/"
-		else
-			echo "Opening http://localhost:$LOCAL_PORT/"
-			xdg-open "http://localhost:$LOCAL_PORT/"
-		fi
+	if [ -n "$SSL" ]; then
+		echo "Opening https://localhost:$LOCAL_PORT/"
+		xdg-open "https://localhost:$LOCAL_PORT/"
+	else
+		echo "Opening http://localhost:$LOCAL_PORT/"
+		xdg-open "http://localhost:$LOCAL_PORT/"
 	fi
 }
 
@@ -44,7 +44,7 @@ kill_forward() {
 	fi
 	echo "Killing ssh port forward: $FORWARD_TO_KILL"
 	cd "/var/run/user/$UID/ssh-port-forward"
-	kill $( head -n 1 "$FORWARD_TO_KILL-ssh.run" )
+	kill $( sed -n 's/PID://p' "$1-ssh.run" )
 	echo "Deleting /var/run/user/$UID/ssh-port-forward/$FORWARD_TO_KILL-ssh.run"
 	rm $FORWARD_TO_KILL-ssh.run
 }
@@ -53,6 +53,11 @@ if [ "$1" == "--help" ] || [ "$1" == "-help" ]; then
 	print_usage
 	exit 0
 fi
+
+
+SILENT_MODE=false
+SSL=false
+
 
 while getopts ":b:hi:k:p:st" opt; do
 	case ${opt} in 
@@ -120,11 +125,9 @@ SSH_HOST=$5
 
 if [ -f "/var/run/user/$UID/ssh-port-forward/$FORWARD_NAME" ]; then
 	echo "/var/run/user/$UID/ssh-port-forward/$FORWARD_NAME already exists. Check if ssh forward is already running"
-	open_in_browser $SILENT_MODE
 	exit 1
 elif [ -f "/var/run/user/$UID/ssh-port-forward/$FORWARD_NAME-ssh.run" ]; then
 	echo "/var/run/user/$UID/ssh-port-forward/$FORWARD_NAME-ssh.run already exists. Check if ssh forward is already running or was not closed correctly"
-	open_in_browser $SILENT_MODE
 	exit 1
 fi
 
@@ -139,10 +142,16 @@ else
 	fi
 fi
 
-
+echo "FORWARD_NAME:$FORWARD_NAME" >> /var/run/user/$UID/ssh-port-forward/$FORWARD_NAME-ssh.run
+echo -n "PID:" >> /var/run/user/$UID/ssh-port-forward/$FORWARD_NAME-ssh.run
 ssh -S $FORWARD_NAME -O check $FORWARD_NAME 2>&1 >/dev/null | grep -o -P '(?<=\=).*(?=\))' >> /var/run/user/$UID/ssh-port-forward/$FORWARD_NAME-ssh.run
-echo "$LOCAL_PORT" >> /var/run/user/$UID/ssh-port-forward/$FORWARD_NAME-ssh.run
-echo "$FORWARDED_HOST" >> /var/run/user/$UID/ssh-port-forward/$FORWARD_NAME-ssh.run
-echo "$FORWARDED_PORT" >> /var/run/user/$UID/ssh-port-forward/$FORWARD_NAME-ssh.run
+echo "LOCAL_PORT:$LOCAL_PORT" >> /var/run/user/$UID/ssh-port-forward/$FORWARD_NAME-ssh.run
+echo "FORWARDED_HOST:$FORWARDED_HOST" >> /var/run/user/$UID/ssh-port-forward/$FORWARD_NAME-ssh.run
+echo "FOWARDED_PORT:$FORWARDED_PORT" >> /var/run/user/$UID/ssh-port-forward/$FORWARD_NAME-ssh.run
+echo "SSL:$SSL" >> /var/run/user/$UID/ssh-port-forward/$FORWARD_NAME-ssh.run
 
-open_in_browser $FORWARD_NAME $SILENT_MODE
+
+
+if [ $SILENT_MODE == false ]; then
+	open_in_browser $FORWARD_NAME
+fi
